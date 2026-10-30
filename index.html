@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ajay Jwellers Calculator</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;padding:8px;font-family:Arial,sans-serif;background:#f5f1e8;color:#222}
+header{background:#805400;color:white;text-align:center;padding:13px;border-radius:9px;margin-bottom:10px}
+.card{background:white;padding:10px;border-radius:9px;margin-bottom:10px;box-shadow:0 1px 5px #0001}
+h2{font-size:18px;margin:5px 0 10px}
+label{display:block;font-size:12px;margin-bottom:4px}
+input{width:100%;min-width:0;padding:9px 5px;border:1px solid #bbb;border-radius:6px;font-size:15px}
+button{border:0;border-radius:7px;padding:10px;background:#805400;color:white;font-weight:bold;cursor:pointer}
+.secondary{background:#555}
+.danger{background:#b3261e}
+.hidden{display:none!important}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.ratebox{padding:11px 5px;border-radius:8px;text-align:center;min-width:0;overflow-wrap:anywhere}
+.ratebox small{display:block;font-size:11px;margin-bottom:6px}
+.ratebox strong{font-size:15px;display:block}
+.goldbox{background:#fff0c2;color:#704700}
+.totalbox{background:#805400;color:white;margin-top:8px;width:100%;padding:14px}
+.silver1{background:#dff5e4;color:#16763b}
+.silver2{background:#dceeff;color:#145db2}
+.silver3{background:#ffead9;color:#b65312}
+.actions{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.actions button{flex:1}
+.row{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:5px;align-items:end;margin:8px 0}
+.note{font-size:12px;color:#666}
+.message{font-size:13px;color:#b3261e;margin-top:7px}
+@media(max-width:360px){
+ body{padding:5px}.card{padding:7px}
+ .ratebox{padding:9px 3px}.ratebox strong{font-size:12px}
+ .ratebox small{font-size:10px}
+ input{font-size:13px;padding:8px 3px}
+ button{font-size:12px;padding:9px 5px}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h2>AJAY JWELLERS</h2>
+  <div>Gold & Silver Calculator</div>
+</header>
+
+<!-- CALCULATOR PAGE: NO PASSWORD -->
+<main id="calcPage">
+  <div class="card">
+    <div class="actions">
+      <button onclick="openSettingsLogin()">Settings</button>
+    </div>
+  </div>
+
+  <section class="card">
+    <h2>Gold Rates</h2>
+    <p class="note">Gold base rate and Total Value are per 10 grams.</p>
+    <div class="grid2">
+      <div class="ratebox goldbox">
+        <small>Gold 18K / 10g</small>
+        <strong id="gold18Display">₹0.00</strong>
+      </div>
+      <div class="ratebox goldbox">
+        <small>Making Charge / 1g</small>
+        <strong id="makingDisplay">₹0.00</strong>
+      </div>
+    </div>
+    <div class="ratebox totalbox">
+      <small>Total Value / 10g</small>
+      <strong id="goldTotalDisplay">₹0.00</strong>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Silver Rates</h2>
+    <p class="note">Silver rates per 10 grams</p>
+    <div class="grid3">
+      <div class="ratebox silver1">
+        <small>Silver One</small>
+        <strong id="silver1Display">₹0.00</strong>
+      </div>
+      <div class="ratebox silver2">
+        <small>Silver Two</small>
+        <strong id="silver2Display">₹0.00</strong>
+      </div>
+      <div class="ratebox silver3">
+        <small>Silver Three</small>
+        <strong id="silver3Display">₹0.00</strong>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Gold Weight Calculator</h2>
+    <div id="rows"></div>
+    <div class="actions">
+      <button onclick="addRow()">+ Add Item</button>
+      <button class="secondary" onclick="clearRows()">Clear Items</button>
+    </div>
+    <div class="ratebox totalbox">
+      <small>Grand Total</small>
+      <strong id="grandTotal">₹0.00</strong>
+    </div>
+  </section>
+</main>
+
+<!-- SETTINGS PASSWORD PAGE -->
+<section id="settingsLoginPage" class="card hidden">
+  <h2>Settings Lock</h2>
+  <p>Enter password to open Settings.</p>
+  <label>Settings Password</label>
+  <input id="settingsLoginPass" type="password" placeholder="Enter settings password">
+  <div class="actions">
+    <button onclick="loginSettings()">Unlock Settings</button>
+    <button class="secondary" onclick="backToCalc()">Back</button>
+  </div>
+  <div id="settingsLoginMsg" class="message"></div>
+</section>
+
+<!-- COMPLETE SETTINGS PAGE -->
+<section id="settingsPage" class="hidden">
+  <div class="card">
+    <h2>Complete Settings</h2>
+    <p class="note">Change Gold and Silver rates, percentages and Settings password here.</p>
+    <button class="secondary" onclick="closeSettings()">Lock Settings & Back</button>
+  </div>
+
+  <div class="card">
+    <h2>Gold Settings</h2>
+    <label>Gold Base Rate / 10g (₹)</label>
+    <input id="goldRate" type="number" min="0" step="any">
+
+    <div class="grid2" style="margin-top:8px">
+      <div>
+        <label>Gold 18K Percentage (%)</label>
+        <input id="goldPct" type="number" min="0" step="any">
+      </div>
+      <div>
+        <label>Making Charge Percentage (%)</label>
+        <input id="makingPct" type="number" min="0" step="any">
+      </div>
+    </div>
+    <p class="note">Making charge is calculated from the full Gold Base Rate and displayed per gram.</p>
+  </div>
+
+  <div class="card">
+    <h2>Silver Settings</h2>
+    <label>Plain Silver Rate / 10g (₹)</label>
+    <input id="silverRate" type="number" min="0" step="any">
+
+    <div class="grid3" style="margin-top:8px">
+      <div>
+        <label>Silver One (%)</label>
+        <input id="silverPct1" type="number" min="0" step="any">
+      </div>
+      <div>
+        <label>Silver Two (%)</label>
+        <input id="silverPct2" type="number" min="0" step="any">
+      </div>
+      <div>
+        <label>Silver Three (%)</label>
+        <input id="silverPct3" type="number" min="0" step="any">
+      </div>
+    </div>
+    <p class="note">Each Silver rate is calculated separately from the same plain Silver Rate.</p>
+  </div>
+
+  <div class="card">
+    <h2>Settings Password</h2>
+    <label>Current Settings Password</label>
+    <input id="currentSettingsPass" type="password" placeholder="Current password">
+
+    <label style="margin-top:8px">New Settings Password (optional)</label>
+    <input id="newSettingsPass" type="password" placeholder="Leave blank to keep current">
+
+    <div class="actions">
+      <button onclick="saveSettings()">Save All Settings</button>
+      <button class="secondary" onclick="closeSettings()">Cancel</button>
+    </div>
+    <div id="saveMsg" class="message"></div>
+    <p class="note">Default Settings password: 1234</p>
+  </div>
+</section>
+
+<script>
+const CFG_KEY = "ajayJwellersConfig";
+const SET_KEY = "ajayJwellersPassword";
+
+const defaults = {
+  gold:146000,
+  pct18:75,
+  makingPct:10,
+  silver:2000,
+  silverPct1:60,
+  silverPct2:75,
+  silverPct3:90
+};
+
+function loadConfig(){
+  try{
+    return {...defaults,...JSON.parse(localStorage.getItem(CFG_KEY)||"{}")};
+  }catch(e){
+    return {...defaults};
+  }
+}
+let cfg = loadConfig();
+let settingsUnlocked = false;
+let settingsTimer = null;
+
+function val(x){
+  const n=Number(x);
+  return Number.isFinite(n)&&n>=0?n:0;
+}
+function money(x){
+  return "₹"+val(x).toLocaleString("en-IN",{
+    minimumFractionDigits:2,maximumFractionDigits:2
+  });
+}
+function gold18(){
+  return val(cfg.gold)*val(cfg.pct18)/100;
+}
+function makingPerGram(){
+  return val(cfg.gold)*val(cfg.makingPct)/100/10;
+}
+function totalGoldPer10g(){
+  return gold18()+makingPerGram()*10;
+}
+function silver(pct){
+  return val(cfg.silver)*val(pct)/100;
+}
+
+function updateDashboard(){
+  document.getElementById("gold18Display").textContent=money(gold18());
+  document.getElementById("makingDisplay").textContent=money(makingPerGram());
+  document.getElementById("goldTotalDisplay").textContent=money(totalGoldPer10g());
+
+  document.getElementById("silver1Display").textContent=money(silver(cfg.silverPct1));
+  document.getElementById("silver2Display").textContent=money(silver(cfg.silverPct2));
+  document.getElementById("silver3Display").textContent=money(silver(cfg.silverPct3));
+  calculate();
+}
+
+function addRow(item="",weight=""){
+  const row=document.createElement("div");
+  row.className="row";
+  row.innerHTML=`
+    <div><label>Item</label><input class="item" placeholder="Ring"></div>
+    <div><label>Weight (g)</label><input class="weight" type="number" min="0" step="any" placeholder="0"></div>
+    <div><label>Amount (₹)</label><input class="amount" readonly placeholder="0.00"></div>
+    <button type="button" class="danger">X</button>`;
+  row.querySelector(".item").value=item;
+  row.querySelector(".weight").value=weight;
+  row.querySelector(".weight").addEventListener("input",calculate);
+  row.querySelector("button").addEventListener("click",()=>{
+    row.remove();
+    calculate();
+  });
+  document.getElementById("rows").appendChild(row);
+  calculate();
+}
+function calculate(){
+  let total=0;
+  document.querySelectorAll("#rows .row").forEach(row=>{
+    const weight=val(row.querySelector(".weight").value);
+    const amount=weight*(totalGoldPer10g()/10);
+    row.querySelector(".amount").value=amount.toFixed(2);
+    total+=amount;
+  });
+  document.getElementById("grandTotal").textContent=money(total);
+}
+function clearRows(){
+  if(confirm("Clear all items?")){
+    document.getElementById("rows").innerHTML="";
+    addRow();
+  }
+}
+
+function showPage(id){
+  ["calcPage","settingsLoginPage","settingsPage"].forEach(page=>{
+    document.getElementById(page).classList.toggle("hidden",page!==id);
+  });
+}
+function openSettingsLogin(){
+  document.getElementById("settingsLoginPass").value="";
+  document.getElementById("settingsLoginMsg").textContent="";
+  showPage("settingsLoginPage");
+}
+function loginSettings(){
+  const correct=localStorage.getItem(SET_KEY)||"1234";
+  if(document.getElementById("settingsLoginPass").value!==correct){
+    document.getElementById("settingsLoginMsg").textContent="Incorrect settings password.";
+    return;
+  }
+  settingsUnlocked=true;
+  fillSettings();
+  showPage("settingsPage");
+  resetSettingsTimer();
+}
+function fillSettings(){
+  document.getElementById("goldRate").value=cfg.gold;
+  document.getElementById("goldPct").value=cfg.pct18;
+  document.getElementById("makingPct").value=cfg.makingPct;
+  document.getElementById("silverRate").value=cfg.silver;
+  document.getElementById("silverPct1").value=cfg.silverPct1;
+  document.getElementById("silverPct2").value=cfg.silverPct2;
+  document.getElementById("silverPct3").value=cfg.silverPct3;
+  document.getElementById("currentSettingsPass").value="";
+  document.getElementById("newSettingsPass").value="";
+  document.getElementById("saveMsg").textContent="";
+}
+function saveSettings(){
+  if(!settingsUnlocked)return;
+
+  const current=localStorage.getItem(SET_KEY)||"1234";
+  if(document.getElementById("currentSettingsPass").value!==current){
+    document.getElementById("saveMsg").textContent="Current settings password is incorrect.";
+    return;
+  }
+
+  const ids=["goldRate","goldPct","makingPct","silverRate","silverPct1","silverPct2","silverPct3"];
+  for(const id of ids){
+    const el=document.getElementById(id);
+    if(el.value.trim()===""||!Number.isFinite(Number(el.value))||Number(el.value)<0){
+      document.getElementById("saveMsg").textContent="Please enter valid numbers in all fields.";
+      el.focus();
+      return;
+    }
+  }
+
+  cfg={
+    gold:val(document.getElementById("goldRate").value),
+    pct18:val(document.getElementById("goldPct").value),
+    makingPct:val(document.getElementById("makingPct").value),
+    silver:val(document.getElementById("silverRate").value),
+    silverPct1:val(document.getElementById("silverPct1").value),
+    silverPct2:val(document.getElementById("silverPct2").value),
+    silverPct3:val(document.getElementById("silverPct3").value)
+  };
+  localStorage.setItem(CFG_KEY,JSON.stringify(cfg));
+
+  const newPass=document.getElementById("newSettingsPass").value.trim();
+  if(newPass)localStorage.setItem(SET_KEY,newPass);
+
+  updateDashboard();
+  document.getElementById("saveMsg").textContent="Settings saved successfully.";
+  document.getElementById("currentSettingsPass").value="";
+  document.getElementById("newSettingsPass").value="";
+}
+function closeSettings(){
+  settingsUnlocked=false;
+  clearTimeout(settingsTimer);
+  showPage("calcPage");
+}
+function backToCalc(){
+  showPage("calcPage");
+}
+function resetSettingsTimer(){
+  clearTimeout(settingsTimer);
+  if(settingsUnlocked){
+    settingsTimer=setTimeout(()=>{
+      settingsUnlocked=false;
+      showPage("calcPage");
+    },60000);
+  }
+}
+["click","keydown","touchstart"].forEach(type=>{
+  document.addEventListener(type,()=>{
+    if(settingsUnlocked)resetSettingsTimer();
+  },{passive:true});
+});
+document.addEventListener("visibilitychange",()=>{
+  if(document.hidden&&settingsUnlocked){
+    settingsUnlocked=false;
+    clearTimeout(settingsTimer);
+    showPage("calcPage");
+  }
+});
+
+addRow();
+updateDashboard();
+</script>
+</body>
+</html>
